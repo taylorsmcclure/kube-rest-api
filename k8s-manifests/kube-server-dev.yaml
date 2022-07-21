@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kube-server-dev
+  namespace: kube-server-dev
+  labels:
+    app: kube-server-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kube-server-dev
+  template:
+    metadata:
+      labels:
+        app: kube-server-dev
+    spec:
+      containers:
+      - name: kube-server-dev
+        imagePullPolicy: Never
+        image: kube-server-dev:latest
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        - name: server-certs
+          mountPath: "/kube-server/server-certs"
+          readOnly: true
+        - name: redis-certs
+          mountPath: "/kube-server/redis-certs"
+          readOnly: true
+        - name: client-certs
+          mountPath: "/kube-server/client-certs"
+          readOnly: true
+        livenessProbe:
+          exec:
+            command: ["./liveness.sh"]
+        startupProbe:
+           exec:
+            command: ["./liveness.sh"]
+           failureThreshold: 30
+           periodSeconds: 10
+      volumes:
+      - name: server-certs
+        secret:
+          secretName: certificates-tls-secret
+      - name: redis-certs
+        secret:
+          secretName: redis-tls-client
+      - name: client-certs
+        secret:
+          secretName: client-tls-secret
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: kube-server-svc
+  namespace: kube-server-dev
+spec:
+  type: NodePort
+  # clusterIP: 10.111.223.82
+  ports:
+  - port: 8080
+    nodePort: 30080
+    protocol: TCP
+    name: http
+  selector:
+    app: kube-server-dev

@@ -1,0 +1,32 @@
+FROM golang:1.18
+#Build args
+ENV PORT=8443
+ENV REDIS_ADDR="redis-master.redis.svc.cluster.local:6379"
+#Adding Labels of build
+LABEL maintainer="Taylor McClure https://github.com/taylorsmcclure/kube-server"
+
+# kube-server user
+ARG USERNAME=kube-server
+ARG USER_UID=1000
+ARG USER_GID=$USER_UID
+
+RUN groupadd --gid $USER_GID $USERNAME && \
+    useradd --uid $USER_UID --gid $USER_GID -m $USERNAME && \
+    mkdir /kube-server && \
+    chmod -R 775 /kube-server && \
+    chown -R $USERNAME:$USERNAME /kube-server
+COPY cmd /kube-server/cmd
+COPY internal /kube-server/internal
+COPY go.mod go.sum /kube-server/
+COPY scripts/entrypoint-dev.sh /kube-server
+COPY scripts/liveness.sh /kube-server
+WORKDIR /kube-server
+
+RUN go mod download
+
+EXPOSE 8080
+
+USER $USERNAME
+
+#Execution
+CMD ["./entrypoint-dev.sh"]

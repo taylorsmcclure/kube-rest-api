@@ -1,0 +1,130 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: busybox-test
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: busybox-deployment0
+  labels:
+    app: busybox
+  namespace: busybox-test
+spec:
+  replicas: 5
+  strategy: 
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: busybox
+  template:
+    metadata:
+      labels:
+        app: busybox
+    spec:
+      containers:
+      - name: busybox
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        
+        command: ['sh', '-c', 'echo Container 1 is Running ; sleep 3600']
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: busybox-deployment1
+  labels:
+    app: busybox
+  namespace: busybox-test
+spec:
+  replicas: 1
+  strategy: 
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: busybox
+  template:
+    metadata:
+      labels:
+        app: busybox
+    spec:
+      containers:
+      - name: busybox
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        
+        command: ['sh', '-c', 'echo Container 1 is Running ; sleep 3600']
+
+---
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: busybox-test2
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: busybox-deployment2
+  labels:
+    app: busybox2
+  namespace: busybox-test2
+spec:
+  replicas: 3
+  strategy: 
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: busybox2
+  template:
+    metadata:
+      labels:
+        app: busybox2
+    spec:
+      containers:
+      - name: busybox2
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        
+        command: ['sh', '-c', 'echo Container 1 is Running ; sleep 3600']
+
+---
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: unavailable-test
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: unavailable-test
+  labels:
+    app: unavailable-test
+  namespace: unavailable-test
+spec:
+  replicas: 3
+  strategy: 
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: unavailable-test
+  template:
+    metadata:
+      labels:
+        app: unavailable-test
+    spec:
+      containers:
+      - name: unavailable-test
+        image: unavailable-test00000000000000000000000000
+        imagePullPolicy: IfNotPresent
+        
+        command: ['sh', '-c', 'echo Container 1 is Running ; sleep 3600']
